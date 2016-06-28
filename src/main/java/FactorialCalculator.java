@@ -1,12 +1,12 @@
 package main.java;
 
 import java.math.BigInteger;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 public class FactorialCalculator {
 	
-	private static Map<Integer, BigInteger> memory = new HashMap<Integer, BigInteger>();
+	private static Map<Integer, BigInteger> memory = new Hashtable<Integer, BigInteger>();
 	
 	public static BigInteger getFactorial(int number){
 		if(!memory.containsKey(number)){
