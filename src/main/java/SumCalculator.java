@@ -40,7 +40,7 @@ public class SumCalculator extends Thread {
 		try{
 			FactorialCalculator factCalc = new FactorialCalculator();
 			for(int i = start; i < precision; i += step){
-				BigDecimal numerator = new BigDecimal(2*i + 1).setScale(precision);
+				BigDecimal numerator = BigDecimal.valueOf(2*i + 1).setScale(precision);
 				BigDecimal fact = factCalc.getFactorial(2 * i);
 				BigDecimal result = numerator.divide(fact,  RoundingMode.CEILING);
 				totalSum = totalSum.add(result).setScale(precision);

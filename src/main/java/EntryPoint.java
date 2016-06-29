@@ -7,7 +7,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class EntryPoint {
 
-	private static int precision = 1000;
+	private static int precision = 10000;
 
 	private static int tasks = Runtime.getRuntime().availableProcessors();
 
@@ -16,6 +16,11 @@ public class EntryPoint {
 	private static boolean beQuiet = false;
 
 	public static void main(String[] args) throws InterruptedException {
+		
+		if(args.length>0 && args[0] == "test"){
+			
+		}
+		
 		readCLIOptions(args);
 		executeCalculation();
 	}
@@ -88,6 +93,10 @@ public class EntryPoint {
 			String formatted = String.format(message, args);
 			System.out.println(formatted);
 		}
+	}
+	
+	private static void makeTest(){
+		
 	}
 
 }
