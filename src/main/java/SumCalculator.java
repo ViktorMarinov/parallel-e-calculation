@@ -1,12 +1,9 @@
 package main.java;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Scanner;
+import java.math.RoundingMode;
 import java.util.concurrent.CountDownLatch;
 
 public class SumCalculator extends Thread {
@@ -21,47 +18,49 @@ public class SumCalculator extends Thread {
 
 	private int precision;
 	
-	private String logPath;
-	
 	private boolean beQuiet;
 
-	public SumCalculator(int start, int step, int precision, CountDownLatch stopLatch, String logPath, boolean beQuiet) {
+	public SumCalculator(int start, int step, int precision, CountDownLatch stopLatch, boolean beQuiet) {
 		this.start = start;
 		this.step = step;
 		this.precision = precision;
 		this.stopLatch = stopLatch;
-		this.logPath = logPath;
 		this.beQuiet = beQuiet;
-		totalSum = BigDecimal.valueOf(0);
+		totalSum = new BigDecimal("0.0");
+	}
+
+	public BigDecimal getTotalSum() {
+		return totalSum;
 	}
 
 	@Override
 	public void run() {
-		PrintWriter writer = null;
+		log("Thread %s has started,", this.getName());
+		long startTime = System.currentTimeMillis();
 		try{
-			writer = new PrintWriter(new FileWriter(logPath));
+			FactorialCalculator factCalc = new FactorialCalculator();
 			for(int i = start; i < precision; i += step){
-				BigInteger numerator = BigInteger.valueOf(2*i + 1);
-				BigInteger fact = FactorialCalculator.getFactorial(2 * i);
-				BigDecimal result = new BigDecimal(numerator.divide(fact));
-				totalSum.add(result);
+				BigDecimal numerator = new BigDecimal(2*i + 1).setScale(precision);
+				BigDecimal fact = factCalc.getFactorial(2 * i);
+				BigDecimal result = numerator.divide(fact,  RoundingMode.CEILING);
+				totalSum = totalSum.add(result).setScale(precision);
 			}
-		} catch (IOException e){
-			log(new PrintWriter(System.out), "Could not open the file!");
-			System.exit(1);
 		} catch (Exception e){
-			log(writer, "Something went wrong while execution calculation!");
-			log(new PrintWriter(System.out), "Something went wrong while execution calculation!");
-			System.exit(1);
+			log("Something went wrong while executing calculation in thread %s", this.getName());
+			e.printStackTrace(System.out);
+			throw new RuntimeException("Something went wrong while executing calculation in thread" + this.getName());
 		} finally {
+			long endTime = System.currentTimeMillis();
+			log("Thread %s has ended.", this.getName());
+			log("Thread %s execution time was %d milliseconds.", this.getName(), endTime - startTime);
 			stopLatch.countDown();
-			writer.close();
 		}
 	}
 	
-	private void log(PrintWriter out, String message){
+	private void log(String message, Object... args){
 		if(!beQuiet){
-			out.println(message);
+			String formatted = String.format(message, args);
+			System.out.println(formatted);
 		}
 	}
 
