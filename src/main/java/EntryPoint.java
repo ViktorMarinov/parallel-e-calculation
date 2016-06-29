@@ -1,14 +1,16 @@
 package main.java;
 
+import java.util.concurrent.CountDownLatch;
+
 public class EntryPoint {
 
-	public static int precision;
+	private static int precision;
 
-	public static int tasks = Runtime.getRuntime().availableProcessors();
+	private static int tasks = Runtime.getRuntime().availableProcessors();
 
-	public static String logPath = "results";
+	private static String logPath = "results";
 	
-	public static boolean beQuiet = false;
+	private static boolean beQuiet = false;
 
 	public static void main(String[] args) {
 		readCLIOptions(args);
@@ -17,12 +19,11 @@ public class EntryPoint {
 	}
 	
 	public static void executeCalculation() {
+		CountDownLatch stopLatch = new CountDownLatch(tasks);
 		
 		SumCalculator[] threadPool = new SumCalculator[tasks];
 		for (int i = 0 ; i < tasks ; i++){
-			threadPool[i].setStart(tasks - i - 1);
-			threadPool[i].setprecision(precision);
-			threadPool[i].setStep(tasks);
+			threadPool[i] = new SumCalculator(tasks - 1, tasks, precision, stopLatch, logPath, beQuiet);
 			threadPool[i].start();
 		}
 	}
@@ -42,10 +43,13 @@ public class EntryPoint {
 				case "-o":
 					logPath = args[++i];
 					break;
-
+				
+				case "-q":
+					beQuiet = true;
+					break;
 				}
 			}
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException | IndexOutOfBoundsException e) {
 			System.out.println("Invalid input parameters");
 			System.exit(1);
 		}
