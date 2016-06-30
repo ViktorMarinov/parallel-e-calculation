@@ -13,15 +13,15 @@ public class EntryPoint {
 
 	private static int tasks = Runtime.getRuntime().availableProcessors();
 
-	private static String filePath = "results";
+	private static String filePath = "result";
 
 	private static boolean beQuiet = false;
 
 	public static void main(String[] args) throws InterruptedException {
 
-		if (args.length > 1 && "test".equals(args[0])) {
-			readCLIOptions(Arrays.copyOfRange(args, 2, args.length));
-			makeTest(Integer.valueOf(args[1]));
+		if (args.length > 0 && "test".equals(args[0])) {
+			readCLIOptions(Arrays.copyOfRange(args, 1, args.length));
+			makeTest(tasks);
 			return;
 		}
 		readCLIOptions(args);
@@ -103,8 +103,14 @@ public class EntryPoint {
 	private static void makeTest(int maxNumberOfThreads) throws InterruptedException {
 		try (PrintWriter writer = new PrintWriter("test_results")) {
 			for (int i = 1; i <= maxNumberOfThreads; ++i) {
-				long timeElapsed = executeCalculation(i, precision, beQuiet, filePath);
-				writer.printf("Number of threads: %d Time(millis): %d\n", i, timeElapsed);
+				writer.printf("Number of threads: %d ", i);
+				long avg = 0;
+				for (int j = 0; j < 3; j++) {
+					long timeElapsed = executeCalculation(i, precision, beQuiet, filePath);
+					avg += timeElapsed;
+					writer.printf("Run %d: %d ", j, timeElapsed);
+				}
+				writer.printf("Avg time: %d\n", avg/3);
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not open file!");
